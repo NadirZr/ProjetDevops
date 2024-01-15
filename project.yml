@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'MOIS', choices: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'], description: 'Choisissez le mois pour lequel vous faites une entrée de journal.')
+    }
+
+    stages {
+        stage('Entrée pour le mois sélectionné') {
+            when {
+                // Cette condition s'assure que le stage ne s'exécute que si le mois de Janvier est sélectionné
+                expression { params.MOIS == 'Janvier' }
+            }
+            steps {
+                script {
+                    // Demande à l'utilisateur de saisir son texte de journal pour Janvier
+                    def userInput = input(id: 'userInput', message: "Veuillez écrire votre entrée de journal pour Janvier:", parameters: [text(name: 'TexteJournal')])
+                    // Chemin du fichier journal pour Janvier
+                    def cheminFichierJournal = "journal_${params.MOIS}.txt"
+                    // Lit le contenu actuel du fichier journal, s'il existe
+                    def journalContent = fileExists(cheminFichierJournal) ? readFile(cheminFichierJournal) : ''
+                    // Ajoute l'entrée de l'utilisateur au contenu du journal
+                    journalContent += "${new Date().format('yyyy-MM-dd HH:mm:ss')} : ${userInput}\n"
+                    // Écrit le contenu mis à jour dans le fichier journal
+                    writeFile file: cheminFichierJournal, text: journalContent
+                }
+            }
+        }
+    }
+}
