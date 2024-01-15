@@ -1,0 +1,36 @@
+pipeline {
+agent any
+/* Déclarations des étapes de construction du Pipeline */
+
+stages {
+    stage('build') {
+      steps {
+        script {
+          echo "Checking de la coque"
+          sleep 10
+          echo "Integrité de la coque à 100%"
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        script {
+          echo "Verification des équipement de navigation"
+          sleep 10
+          echo "Léger disfonctionnement de la carte numerique" 
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        script {
+          echo "Verification des equipements de communication"
+          sleep 10
+          echo "Test radio ok. "    
+        }
+      }
+    }
+}
+
+}
