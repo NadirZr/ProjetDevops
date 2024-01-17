@@ -1,89 +1,76 @@
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
-
-   // Fonction pour sauvegarder une entrée de journal dans un fichier
-def sauvegarderEntreeJournal(Map entree) {
-   def json = new JsonBuilder(entree).toPrettyString()
-   def journalFile = new File(JOURNAL_DIR, "journal-${entree.date.format('yyyyMMdd')}.json")
-   journalFile.write(json)
-}
-
-// Fonction pour charger une entrée de journal à partir d'un fichier
-def chargerEntreeJournal(Date date) {
-   def journalFile = new File(JOURNAL_DIR, "journal-${date.format('yyyyMMdd')}.json")
-   def jsonText = journalFile.text
-   def jsonSlurper = new JsonSlurper()
-   def data = jsonSlurper.parseText(jsonText)
-   return data
-}
-
-// Fonction pour lire toutes les entrées de journal à partir des fichiers
-def lireEntriesJournal() {
-  def journalFiles = new File(JOURNAL_DIR).listFiles()
-  journalFiles.sort { a, b -> b.name <=> a.name } // Tri par ordre décroissant
-  journalFiles.each { file ->
-     def date = file.name.replaceAll(/^journal-/, '').replaceAll(/.json$/, '')
-     def data = chargerEntreeJournal(Date.parse('yyyyMMdd', date))
-     println "Date: $date\n${data}\n---"
-  }
-}
-
-
-// Paramètres initiaux
-def params = [
-    "MOIS" : "Janvier",
-    "NOM": "Jean",
-    "JOUR": 1
-]
-
-// Fonction pour générer une entrée de journal avec des métadonnées supplémentaires
-def genererEntreeJournal(String nom, String texte, String photos, String videos, Date date, String theme, String humeur) {
-    return [
-        titre: "Journal de $nom",
-        texte: texte,
-        photos: photos,
-        videos: videos,
-        date: date,
-        theme: theme,
-        humeur: humeur
+    def genererEntreeJournal(nom) {
+        return [titre: "Journal de $nom", texte: "Texte de l'entrée du journal"]
+    }
+    
+    def enregistrerDonnees(donnees) {
+        println("Données enregistrées en base de données : $donnees")
+    }
+    def trackerActivites(objectifs) {
+        return [sport: 1, meditation: 7] 
+    }
+    def envoyerNotification(message) {
+        println("Notification envoyée : $message")
+    }
+    def par = [
+      "MOIS" : "Janvier", // nb jours objectif
+      "NOM": "Jean",
+      "JOUR": 1
     ]
-}
+    // Initialiser le suivi
+    def objectifs = [
+        "ecrireJournal" : 31, // nb jours objectif
+        "lireLivre": 1  // nb livres objectif
+    ]
 
-// Fonction pour enregistrer les données (simulée ici par un affichage console)
-def enregistrerDonnees(Map donnees) {
-    println("Données enregistrées en base de données : $donnees")
-}
+    def activites = trackerActivites(objectifs)
 
-// Fonction pour envoyer une notification (simulée ici par un affichage console)
-def envoyerNotification(String message) {
-    println("Notification envoyée : $message")
-}
+    def progression = [
+        "ecrireJournal": 0,
+        "lireLivre": 0
+    ]
+    def progression_after_15 = [
+        "ecrireJournal" : 15,
+        "lireLivre" : 0
+    ]
 
-node {
-    // Suspendre l'exécution et demander à l'utilisateur de saisir des informations
-    def userInput = input(
-        id: 'userInput', message: 'Entrez les détails de votre entrée de journal:',
-        parameters: [
-            string(name: 'Texte', defaultValue: 'Texte de l\'entrée du journal', description: 'Entrez le texte de votre entrée de journal'),
-            string(name: 'Photos', defaultValue: 'photo1.jpg, photo2.jpg', description: 'Entrez les noms des fichiers des photos, séparés par des virgules'),
-            string(name: 'Videos', defaultValue: 'video1.mp4, video2.mp4', description: 'Entrez les noms des fichiers des vidéos, séparés par des virgules'),
-            string(name: 'Theme', defaultValue: 'Mon Thème', description: 'Entrez le thème de l\'entrée du journal'),
-            string(name: 'Humeur', defaultValue: 'Mon Humeur', description: 'Entrez votre humeur pour l\'entrée du journal')
-        ]
-    )
+    // Calculer progression en fonction du jour
+    def jourActuel = par.JOUR.toInteger()
 
-    // Création et enregistrement d'une nouvelle entrée de journal avec les informations de l'utilisateur
-    def nouvelleEntree = genererEntreeJournal(
-        params.NOM,
-        userInput['Texte'],
-        userInput['Photos'],
-        userInput['Videos'],
-        new Date(),
-        userInput['Theme'],
-        userInput['Humeur']
-    )
-   sauvegarderEntreeJournal(nouvelleEntree)
-   enregistrerDonnees(nouvelleEntree)
-   envoyerNotification("Nouvelle entrée pour ${params.NOM}")
-   lireEntriesJournal()
-}
+    if (jourActuel >= 1 && jourActuel < 15) {
+        progression.ecrireJournal = jourActuel
+        genererEntreeJournal("${par.NOM}").with {
+            enregistrerDonnees(it)
+            envoyerNotification("Nouvelle entrée pour ${par.NOM}")
+        }
+    } else {
+        if (progression_after_15.ecrireJournal >= 15 && jourActuel == progression_after_15.ecrireJournal) {
+            if (progression_after_15.lireLivre == 1) {
+                println "Tu es sur la bonne voie, continue de remplir quotidiennement ton journal et tu atteindras ton objectif du mois."
+            } else {
+                println "Tu es sur la bonne voie mais n'oublie pas de lire $objectifs.lireLivre livre pour atteindre tous tes objectifs."
+            }
+
+        } else {
+            if (jourActuel >= 15) {
+                if (progression_after_15.ecrireJournal == 15) {
+                    objectifs.ecrireJournal = 20
+                } else {
+                    objectifs.ecrireJournal = 15
+                }
+            } else {
+                progression.ecrireJournal = 5
+            }
+
+            objectifs.lireLivre = 1
+
+            println "Malheureusement je vois que t'auras du mal à réaliser tes objectifs. Mais ne t'inquiète pas je les ai réajustés pour te permettre de les atteindre. Bonne chance"
+        }
+    }
+
+    // Afficher progression
+    println "Objectifs à atteindre: $objectifs"
+    if (jourActuel < 15) {
+        println "Progression au $jourActuel ${par.MOIS} : $progression"
+    } else {
+        println "Progression au $jourActuel ${par.MOIS} : $progression_after_15"
+    }
