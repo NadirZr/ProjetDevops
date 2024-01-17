@@ -62,6 +62,8 @@ def envoyerNotification(String message) {
 }
 
 node {
+      def JOURNAL_DIR = "${env.WORKSPACE}/journals"
+
     // Suspendre l'exécution et demander à l'utilisateur de saisir des informations
     def userInput = input(
         id: 'userInput', message: 'Entrez les détails de votre entrée de journal:',
