@@ -1,48 +1,56 @@
-    def genererEntreeJournal(nom) {
-        return [titre: "Journal de $nom", texte: "Texte de l'entrée du journal"]
-    }
-    
-    def enregistrerDonnees(donnees) {
-        println("Données enregistrées en base de données : $donnees")
-    }
-    def trackerActivites(objectifs) {
-        return [sport: 1, meditation: 7] 
-    }
-    def envoyerNotification(message) {
-        println("Notification envoyée : $message")
-    }
-    def par = [
-      "MOIS" : "Janvier", // nb jours objectif
-      "NOM": "Jean",
-      "JOUR": 1
-    ]
-    // Initialiser le suivi
-    def objectifs = [
-        "ecrireJournal" : 31, // nb jours objectif
-        "lireLivre": 1  // nb livres objectif
-    ]
+def demanderTexteEntree() {
+    return input(message: 'Veuillez entrer le texte de votre entrée de journal', parameters: [textarea(name: 'texte')])
+}
 
-    def activites = trackerActivites(objectifs)
+def genererEntreeJournal(nom, texte, photos='placeholder_photo', videos='placeholder_video') {
+    return [titre: "Journal de $nom", texte: texte, photos: photos, videos: videos]
+}
 
-    def progression = [
-        "ecrireJournal": 0,
-        "lireLivre": 0
-    ]
-    def progression_after_15 = [
-        "ecrireJournal" : 15,
-        "lireLivre" : 0
-    ]
+def enregistrerDonnees(donnees) {
+    println("Données enregistrées en base de données : $donnees")
+}
 
-    // Calculer progression en fonction du jour
-    def jourActuel = par.JOUR.toInteger()
+def trackerActivites(objectifs) {
+    return [sport: 1, meditation: 7] 
+}
 
-    if (jourActuel >= 1 && jourActuel < 15) {
-        progression.ecrireJournal = jourActuel
-        genererEntreeJournal("${par.NOM}").with {
-            enregistrerDonnees(it)
-            envoyerNotification("Nouvelle entrée pour ${par.NOM}")
-        }
-    } else {
+def envoyerNotification(message) {
+    println("Notification envoyée : $message")
+}
+
+def par = [
+    "MOIS" : "Janvier",
+    "NOM": "Jean",
+    "JOUR": 1
+]
+
+def objectifs = [
+    "ecrireJournal" : 31,
+    "lireLivre": 1
+]
+
+def activites = trackerActivites(objectifs)
+
+def progression = [
+    "ecrireJournal": 0,
+    "lireLivre": 0
+]
+
+def progression_after_15 = [
+    "ecrireJournal" : 15,
+    "lireLivre" : 0
+]
+
+def jourActuel = par.JOUR.toInteger()
+
+if (jourActuel >= 1 && jourActuel < 15) {
+    progression.ecrireJournal = jourActuel
+    def texteEntree = demanderTexteEntree()
+    genererEntreeJournal(par.NOM, texteEntree).with {
+        enregistrerDonnees(it)
+        envoyerNotification("Nouvelle entrée pour ${par.NOM}")
+    }
+}  else {
         if (progression_after_15.ecrireJournal >= 15 && jourActuel == progression_after_15.ecrireJournal) {
             if (progression_after_15.lireLivre == 1) {
                 println "Tu es sur la bonne voie, continue de remplir quotidiennement ton journal et tu atteindras ton objectif du mois."
@@ -68,9 +76,9 @@
     }
 
     // Afficher progression
-    println "Objectifs à atteindre: $objectifs"
-    if (jourActuel < 15) {
-        println "Progression au $jourActuel ${par.MOIS} : $progression"
-    } else {
-        println "Progression au $jourActuel ${par.MOIS} : $progression_after_15"
-    }
+println "Objectifs à atteindre: $objectifs"
+if (jourActuel < 15) {
+    println "Progression au $jourActuel ${par.MOIS} : $progression"
+} else {
+    println "Progression au $jourActuel ${par.MOIS} : $progression_after_15"
+}
