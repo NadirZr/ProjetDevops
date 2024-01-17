@@ -1,3 +1,36 @@
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
+
+// Chemin vers le répertoire où les entrées de journal seront stockées
+def JOURNAL_DIR = "${env.WORKSPACE}/journals"
+
+// Fonction pour sauvegarder une entrée de journal dans un fichier
+def sauvegarderEntreeJournal(Map entree) {
+   def json = new JsonBuilder(entree).toPrettyString()
+   def journalFile = new File(JOURNAL_DIR, "journal-${entree.date.format('yyyyMMdd')}.json")
+   journalFile.write(json)
+}
+
+// Fonction pour charger une entrée de journal à partir d'un fichier
+def chargerEntreeJournal(Date date) {
+   def journalFile = new File(JOURNAL_DIR, "journal-${date.format('yyyyMMdd')}.json")
+   def jsonText = journalFile.text
+   def jsonSlurper = new JsonSlurper()
+   def data = jsonSlurper.parseText(jsonText)
+   return data
+}
+
+// Fonction pour lire toutes les entrées de journal à partir des fichiers
+def lireEntriesJournal() {
+  def journalFiles = new File(JOURNAL_DIR).listFiles()
+  journalFiles.sort { a, b -> b.name <=> a.name } // Tri par ordre décroissant
+  journalFiles.each { file ->
+     def date = file.name.replaceAll(/^journal-/, '').replaceAll(/.json$/, '')
+     def data = chargerEntreeJournal(Date.parse('yyyyMMdd', date))
+     println "Date: $date\n${data}\n---"
+  }
+}
+
 // Paramètres initiaux
 def params = [
     "MOIS" : "Janvier",
@@ -51,6 +84,8 @@ node {
         userInput['Theme'],
         userInput['Humeur']
     )
-    enregistrerDonnees(nouvelleEntree)
-    envoyerNotification("Nouvelle entrée pour ${params.NOM}")
+   sauvegarderEntreeJournal(nouvelleEntree)
+   enregistrerDonnees(nouvelleEntree)
+   envoyerNotification("Nouvelle entrée pour ${params.NOM}")
+   lireEntriesJournal()
 }
