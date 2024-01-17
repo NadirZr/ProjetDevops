@@ -1,3 +1,4 @@
+                  import hudson.model.*
                     def verifierObjectifs(objectifs, activites) {
                         println("Vérification des objectifs atteints")
                         return true
@@ -33,6 +34,12 @@
                     def messageEncouragement = "Le succès est la somme de petits efforts, répétés jour après jour. On croit en toi, tu peux le faire."
 
                     if (params.MOIS == 'Mars') {
+                        properties([
+        parameters([
+            number(name: 'POIDS', defaultValue: 70, description: 'Votre poids en kilogrammes'),
+            number(name: 'TAILLE', defaultValue: 1.75, description: 'Votre taille en mètres')
+        ])
+    ])
                         // Calculer progression en fonction du jour
                         def jourActuel = params.JOUR.toInteger()
                         if (params.JOUR >= '1' && params.JOUR <'15') {
@@ -78,13 +85,16 @@
                                 
                                 println "Malheureusement je vois que t'auras du mal à réaliser tes objectifs. Mais ne t'inquiète pas je les ai réajuster pour te permettre de les atteindre. Bonne chance"
                             }
-                        }
-                        def output = sh(script: "${pythonPath} calcul_imc.py", returnStdout: true).trim()
-                        println(output)
-                        // Envoyer un message d'encouragement
-                        envoyerNotification(messageEncouragement)
-                        // Afficher progression
-                        println "Objectis à atteindre: $objectifs"    
+                          // Use the parameters to calculate BMI when the build is triggered
+    def poids = params.POIDS.toFloat()
+    def taille = params.TAILLE.toFloat()
+    
+    // Call the Python script to calculate BMI using the provided weight and height
+    def pythonPath = "python3"
+    def scriptPath = "calcul_imc.py" // Path to your Python script
+    def bmiOutput = sh(script: "${pythonPath} ${scriptPath} ${poids} ${taille}", returnStdout: true).trim()
+    println("Résultat du calcul de l'IMC : ${bmiOutput}")
+                        }  
                         if (jourActuel < 15){
                             println "Progression au $jourActuel $params.MOIS : $progression"
                         } else {
