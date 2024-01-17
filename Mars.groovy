@@ -29,6 +29,9 @@
                         "nombreDeNotif": 15 
                     ]
 
+                    def pythonPath = "python"
+                    def messageEncouragement = "Le succès est la somme de petits efforts, répétés jour après jour. On croit en toi, tu peux le faire."
+
                     if (params.MOIS == 'Mars') {
                         // Calculer progression en fonction du jour
                         def jourActuel = params.JOUR.toInteger()
@@ -76,6 +79,10 @@
                                 println "Malheureusement je vois que t'auras du mal à réaliser tes objectifs. Mais ne t'inquiète pas je les ai réajuster pour te permettre de les atteindre. Bonne chance"
                             }
                         }
+                        def output = sh(script: "${pythonPath} calcul_imc.py", returnStdout: true).trim()
+                        println(output)
+                        // Envoyer un message d'encouragement
+                        envoyerNotification(messageEncouragement)
                         // Afficher progression
                         println "Objectis à atteindre: $objectifs"    
                         if (jourActuel < 15){
