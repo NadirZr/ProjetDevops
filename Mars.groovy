@@ -29,7 +29,7 @@
                         "nombreDeNotif": 15 
                     ]
 
-                    def pythonPath = "python"
+                    def pythonPath = "python3"
                     def messageEncouragement = "Le succès est la somme de petits efforts, répétés jour après jour. On croit en toi, tu peux le faire."
 
                     if (params.MOIS == 'Mars') {
