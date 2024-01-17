@@ -3,6 +3,11 @@ import groovy.json.JsonSlurper
 
 // Chemin vers le répertoire où les entrées de journal seront stockées
 def JOURNAL_DIR = "${env.WORKSPACE}/journals"
+// Vérifier et créer le répertoire des journaux si nécessaire
+ def journalDir = new File(JOURNAL_DIR)
+ if (!journalDir.exists()) {
+  journalDir.mkdirs()
+ }
 
 // Fonction pour sauvegarder une entrée de journal dans un fichier
 def sauvegarderEntreeJournal(Map entree) {
@@ -62,7 +67,6 @@ def envoyerNotification(String message) {
 }
 
 node {
-      def JOURNAL_DIR = "${env.WORKSPACE}/journals"
 
     // Suspendre l'exécution et demander à l'utilisateur de saisir des informations
     def userInput = input(
