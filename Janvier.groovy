@@ -1,76 +1,54 @@
-    def genererEntreeJournal(nom) {
-        return [titre: "Journal de $nom", texte: "Texte de l'entrée du journal"]
-    }
-    
-    def enregistrerDonnees(donnees) {
-        println("Données enregistrées en base de données : $donnees")
-    }
-    def trackerActivites(objectifs) {
-        return [sport: 1, meditation: 7] 
-    }
-    def envoyerNotification(message) {
-        println("Notification envoyée : $message")
-    }
-    def par = [
-      "MOIS" : "Janvier", // nb jours objectif
-      "NOM": "Jean",
-      "JOUR": 1
+// Fonction pour générer une entrée de journal avec des métadonnées supplémentaires
+def genererEntreeJournal(String nom, String texte, String photos, String videos, Date date, String theme, String humeur) {
+    return [
+        titre: "Journal de $nom",
+        texte: texte,
+        photos: photos, // Simuler l'ajout de photos par du texte
+        videos: videos, // Simuler l'ajout de vidéos par du texte
+        date: date,
+        theme: theme,
+        humeur: humeur
     ]
-    // Initialiser le suivi
-    def objectifs = [
-        "ecrireJournal" : 31, // nb jours objectif
-        "lireLivre": 1  // nb livres objectif
-    ]
+}
 
-    def activites = trackerActivites(objectifs)
+// Fonction pour enregistrer les données (simulée ici par un affichage console)
+def enregistrerDonnees(Map donnees) {
+    println("Données enregistrées en base de données : $donnees")
+}
 
-    def progression = [
-        "ecrireJournal": 0,
-        "lireLivre": 0
-    ]
-    def progression_after_15 = [
-        "ecrireJournal" : 15,
-        "lireLivre" : 0
-    ]
+// Fonction pour envoyer une notification (simulée ici par un affichage console)
+def envoyerNotification(String message) {
+    println("Notification envoyée : $message")
+}
 
-    // Calculer progression en fonction du jour
-    def jourActuel = par.JOUR.toInteger()
+// Paramètres initiaux
+def params = [
+    "MOIS" : "Janvier",
+    "NOM": "Jean",
+    "JOUR": 1
+]
 
-    if (jourActuel >= 1 && jourActuel < 15) {
-        progression.ecrireJournal = jourActuel
-        genererEntreeJournal("${par.NOM}").with {
-            enregistrerDonnees(it)
-            envoyerNotification("Nouvelle entrée pour ${par.NOM}")
-        }
-    } else {
-        if (progression_after_15.ecrireJournal >= 15 && jourActuel == progression_after_15.ecrireJournal) {
-            if (progression_after_15.lireLivre == 1) {
-                println "Tu es sur la bonne voie, continue de remplir quotidiennement ton journal et tu atteindras ton objectif du mois."
-            } else {
-                println "Tu es sur la bonne voie mais n'oublie pas de lire $objectifs.lireLivre livre pour atteindre tous tes objectifs."
-            }
+// Création et enregistrement d'une nouvelle entrée de journal
+def nouvelleEntree = genererEntreeJournal(params.NOM, "Voici mon texte de journal.", "Photo de mes vacances", "Vidéo de mon anniversaire", new Date(), "Vacances", "Joyeux")
+enregistrerDonnees(nouvelleEntree)
+envoyerNotification("Nouvelle entrée pour ${params.NOM}")
 
-        } else {
-            if (jourActuel >= 15) {
-                if (progression_after_15.ecrireJournal == 15) {
-                    objectifs.ecrireJournal = 20
-                } else {
-                    objectifs.ecrireJournal = 15
-                }
-            } else {
-                progression.ecrireJournal = 5
-            }
-
-            objectifs.lireLivre = 1
-
-            println "Malheureusement je vois que t'auras du mal à réaliser tes objectifs. Mais ne t'inquiète pas je les ai réajustés pour te permettre de les atteindre. Bonne chance"
-        }
+// Fonction pour classer les entrées de journal
+def classerEntrees(List entrees, String critere) {
+    switch (critere) {
+        case 'date':
+            entrees.sort { it.date }
+            break
+        case 'theme':
+            entrees.sort { it.theme }
+            break
+        case 'humeur':
+            entrees.sort { it.humeur }
+            break
     }
+}
 
-    // Afficher progression
-    println "Objectifs à atteindre: $objectifs"
-    if (jourActuel < 15) {
-        println "Progression au $jourActuel ${par.MOIS} : $progression"
-    } else {
-        println "Progression au $jourActuel ${par.MOIS} : $progression_after_15"
-    }
+// Exemple de classement et d'affichage des entrées
+def journal = [nouvelleEntree] // Simuler une liste d'entrées
+classerEntrees(journal, 'date') // Classer par date
+journal.each { println it } // Afficher les entrées
